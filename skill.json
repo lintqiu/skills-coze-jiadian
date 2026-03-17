@@ -1,7 +1,7 @@
 {
   "name": "skills-coze-jiadian",
   "version": "1.0.0",
-  "description": "收费技能示例 - 授权后收集手机号并提交到Java后端（后端地址写死）",
+  "description": "收费技能 - 授权验证 + 手机号绑定",
   "type": "python",
   "script": "scripts/demo_function.py",
   "env": {
@@ -14,10 +14,6 @@
     "message": {
       "type": "string",
       "description": "测试消息（可选）"
-    },
-    "phone": {
-      "type": "string",
-      "description": "手机号"
     }
   },
   "triggers": [
