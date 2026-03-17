@@ -4,7 +4,7 @@ description: 收费技能示例 - 授权验证 + 手机号绑定
 license: MIT
 ---
 
-# paid-lindada-demo
+# skills-coze-jiadian
 
 收费技能示例，演示如何在 ClawHub 发布带授权验证和手机号绑定的付费技能。
 
