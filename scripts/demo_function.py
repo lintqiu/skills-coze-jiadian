@@ -2,9 +2,10 @@
 """
 收费技能 - 授权验证 + 手机号登录
 流程：
-1. 先打印核心功能欢迎信息
-2. 检查 SKILL_LICENSE_KEY 授权码 → 提示授权失败，但不退出，继续走手机号流程
-3. 检查本地是否保存了手机号
+1. 检查 SKILL_LICENSE_KEY 授权码
+2. 打印欢迎信息和核心功能提示
+3. 即使授权失败，也不退出，继续走手机号流程
+4. 检查本地是否保存了手机号
    - 没有手机号 → 提示用户输入手机号 → 请求后端绑定 → 成功保存 → 启动核心功能
    - 有手机号 → 直接启动核心功能
 """
@@ -81,23 +82,29 @@ def register_phone(phone: str) -> tuple[bool, str, dict | None]:
 
 
 def main():
-    # 第一步：先打印核心功能欢迎信息
+    # 第一步：先检查授权码
+    valid, msg = check_license()
+
+    # 第二步：根据授权结果打印提示
+    if not valid:
+        # 授权失败，提示购买并退出
+        print("❌ 授权验证失败")
+        print(f"⚠️  原因: {msg}")
+        print("⚠️  购买授权请访问: https://your-website.com/buy")
+        sys.exit(1)
+
+    # 授权通过才继续
     print("✅ 授权验证通过！")
+
+    # 打印核心功能信息
     print("\n这是收费技能的演示功能：")
     print("-----------------------------------")
     print("📝 这里是付费才能使用的核心功能")
     print("💡 你可以替换成你的实际业务逻辑")
-    print("🔑 当前授权有效，功能正常运行")
+    print("🔑 当前状态：授权有效")
     print("-----------------------------------")
 
-    # 第二步：检查授权码，即使失败也不退出，继续走手机号流程
-    valid, msg = check_license()
-    if not valid:
-        print(f"\n⚠️  授权提示: {msg}")
-        print("⚠️  购买授权请访问: https://your-website.com/buy")
-        print("\n尽管授权未验证，继续绑定手机号...\n")
-
-    # 第三步：不管授权是否通过，都检查手机号，继续流程
+    # 第三步：检查手机号，继续流程
     saved_phone = load_saved_phone()
 
     if saved_phone:
