@@ -19,6 +19,11 @@ def hash_license(license_key: str, salt: str = SALT) -> str:
     return hashlib.sha256((license_key + salt).encode()).hexdigest()
 
 
+def get_encryption_key(license_key: str) -> bytes:
+    """从授权码派生加密密钥"""
+    return hashlib.sha256((license_key + SALT).encode()).digest()
+
+
 def check_license() -> Tuple[bool, str]:
     """
     检查授权码
@@ -54,10 +59,10 @@ def main():
     valid, msg = check_license()
 
     if valid:
-        print(f'{"valid": true, "message": "{msg}"}')
+        print(f'{{"valid": true, "message": "{msg}"}}')
         sys.exit(0)
     else:
-        print(f'{"valid": false, "message": "{msg}"}', file=sys.stderr)
+        print(f'{{"valid": false, "message": "{msg}"}}', file=sys.stderr)
         sys.exit(1)
 
 

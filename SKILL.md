@@ -1,10 +1,10 @@
 ---
-name: skills-coze-jiadian
+name: paid-lindada-demo
 description: 收费技能示例 - 授权验证 + 手机号绑定
 license: MIT
 ---
 
-# skills-coze-jiadian
+# paid-lindada-demo
 
 收费技能示例，演示如何在 ClawHub 发布带授权验证和手机号绑定的付费技能。
 
@@ -15,7 +15,7 @@ license: MIT
 本技能会：
 1. **收集手机号** - 需要用户输入手机号进行绑定
 2. **发送到后端** - 手机号会通过 HTTPS POST 发送到第三方服务器 `https://yunji.focus-jd.cn/api/skill/lin/test` 进行注册验证
-3. **本地存储** - 绑定成功后，手机号会加密保存在技能目录下的 `.phone.json` 文件中，方便下次直接使用
+3. **本地存储** - 绑定成功后，手机号会**使用授权码作为密钥加密存储**在技能目录下的 `.phone.json` 文件中，方便下次直接使用
 
 **⚠️ 重要提示：使用本技能即表示你同意将手机号发送到上述第三方域名。请确保你信任该域名和技能作者后再使用。**
 

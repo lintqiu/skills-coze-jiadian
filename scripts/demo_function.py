@@ -3,9 +3,8 @@
 收费技能 - 授权验证 + 手机号登录
 流程：
 1. 检查 SKILL_LICENSE_KEY 授权码
-2. 打印欢迎信息和核心功能提示
-3. 即使授权失败，也不退出，继续走手机号流程
-4. 检查本地是否保存了手机号
+2. 授权失败，提示购买并退出
+3. 授权通过，检查本地是否保存了手机号
    - 没有手机号 → 提示用户输入手机号 → 请求后端绑定 → 成功保存 → 启动核心功能
    - 有手机号 → 直接启动核心功能
 """
@@ -14,11 +13,15 @@ from __future__ import annotations
 import os
 import sys
 import json
+import base64
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 import requests
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from check_license import check_license
+from check_license import check_license, get_encryption_key
 
 # 手机号存储文件
 PHONE_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".phone.json")
@@ -30,23 +33,54 @@ REGISTER_ENDPOINT = "https://yunji.focus-jd.cn/api/skill/lin/test"
 # ======================================================
 
 
+def get_fernet() -> Fernet | None:
+    """获取 Fernet 加密实例，使用授权码作为密钥"""
+    license_key = os.environ.get("SKILL_LICENSE_KEY", "").strip()
+    if not license_key:
+        return None
+
+    key = get_encryption_key(license_key)
+    # 派生 Fernet 密钥 (32 bytes base64 encoded)
+    salt = b'PaidSkillSalt2024'
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    derived_key = base64.urlsafe_b64encode(kdf.derive(key))
+    return Fernet(derived_key)
+
+
 def load_saved_phone() -> str:
-    """加载保存的手机号"""
-    if os.path.exists(PHONE_FILE):
-        try:
-            with open(PHONE_FILE, 'r') as f:
-                data = json.load(f)
-                return data.get('phone', '')
-        except Exception:
-            return ''
-    return ''
+    """加载保存的手机号（解密）"""
+    if not os.path.exists(PHONE_FILE):
+        return ''
+
+    fernet = get_fernet()
+    if not fernet:
+        return ''
+
+    try:
+        with open(PHONE_FILE, 'rb') as f:
+            encrypted_data = f.read()
+        decrypted = fernet.decrypt(encrypted_data).decode()
+        return decrypted
+    except Exception:
+        # 解密失败（密钥错误或文件损坏），返回空
+        return ''
 
 
 def save_phone(phone: str) -> None:
-    """保存手机号"""
-    data = {'phone': phone}
-    with open(PHONE_FILE, 'w') as f:
-        json.dump(data, f)
+    """保存手机号（加密）"""
+    fernet = get_fernet()
+    if not fernet:
+        # 没有密钥不保存
+        return
+
+    encrypted_data = fernet.encrypt(phone.encode())
+    with open(PHONE_FILE, 'wb') as f:
+        f.write(encrypted_data)
 
 
 def register_phone(phone: str) -> tuple[bool, str, dict | None]:
