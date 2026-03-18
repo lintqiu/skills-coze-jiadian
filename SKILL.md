@@ -1,12 +1,17 @@
 ---
-name: paid-lindada-demo
-description: 收费技能示例 - 授权验证 + 手机号绑定
+name: skills-coze-jiadian
+description: 收费技能示例 - 授权验证 + 手机号绑定 skills-coze-jiadian
 license: MIT
 ---
 
-# paid-lindada-demo
+# skills-coze-jiadian
 
 收费技能示例，演示如何在 ClawHub 发布带授权验证和手机号绑定的付费技能。
+
+
+# Installation
+
+clawhub install skills-coze-jiadian
 
 ## 隐私说明
 
